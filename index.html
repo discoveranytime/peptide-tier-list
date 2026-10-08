@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Peptide Tier List — An Evidence-First Ranking</title>
+<meta name="description" content="An interactive, entertainment-style tier list ranking 30 well-known peptides on the total evidence package. Educational only.">
+<style>
+:root{
+  --bg:#0a0f1a; --bg2:#0d1424; --panel:#101a2e; --panel2:#14203a;
+  --line:rgba(148,178,220,.14); --line2:rgba(148,178,220,.22);
+  --ink:#e8eff9; --muted:#93a1bd; --faint:#67748f;
+  --acc:#38bdf8; --acc2:#2dd4bf; --acc-dim:rgba(56,189,248,.12);
+  --r:16px; --font:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+}
+[data-theme="light"]{
+  --bg:#eef1f6; --bg2:#e7ebf2; --panel:#f7f9fc; --panel2:#ffffff;
+  --line:rgba(30,50,90,.12); --line2:rgba(30,50,90,.2);
+  --ink:#16233a; --muted:#4c5d78; --faint:#7c8aa3;
+  --acc:#0284c7; --acc2:#0d9488; --acc-dim:rgba(2,132,199,.08);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--ink);font-family:var(--font);line-height:1.6;
+  -webkit-font-smoothing:antialiased;min-height:100vh;overflow-x:hidden}
+.bg{position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:
+   radial-gradient(900px 500px at 15% -5%, rgba(56,189,248,.10), transparent 60%),
+   radial-gradient(800px 500px at 85% 15%, rgba(45,212,191,.07), transparent 60%),
+   radial-gradient(1000px 700px at 50% 115%, rgba(56,189,248,.05), transparent 60%)}
+#ambient{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none}
+[data-theme="light"] #ambient{opacity:.55}
+.wrap{max-width:1060px;margin:0 auto;padding:0 22px;position:relative;z-index:1}
+#themeToggle{position:fixed;top:16px;right:16px;z-index:70;display:flex;background:var(--panel);
+  border:1px solid var(--line2);border-radius:999px;padding:3px;gap:2px}
+#themeToggle button{border:0;background:transparent;color:var(--muted);font-family:var(--font);
+  font-size:.78rem;font-weight:700;padding:6px 12px;border-radius:999px;cursor:pointer}
+#themeToggle button[aria-pressed="true"]{background:var(--acc-dim);color:var(--acc)}
+/* hero */
+.hero{padding:64px 0 18px;text-align:center}
+.hero .kicker{display:inline-block;font-size:.72rem;font-weight:800;letter-spacing:2.4px;text-transform:uppercase;
+  color:var(--acc);border:1px solid var(--line2);border-radius:999px;padding:6px 16px;margin-bottom:18px;
+  background:var(--acc-dim)}
+.hero h1{font-size:clamp(2.4rem,6vw,4rem);font-weight:900;letter-spacing:-.02em;line-height:1.05;margin-bottom:12px}
+.hero h1 .grad{background:linear-gradient(100deg,#facc15,#4ade80 35%,#38bdf8 70%,#f87171);
+  -webkit-background-clip:text;background-clip:text;color:transparent}
+.hero .sub{color:var(--muted);font-size:1.02rem;max-width:640px;margin:0 auto}
+.hero .sub strong{color:var(--ink)}
+/* cards */
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);
+  padding:26px;margin:26px 0;box-shadow:0 18px 50px -30px rgba(0,0,0,.7)}
+.card h2{font-size:1.35rem;font-weight:800;letter-spacing:-.01em;margin-bottom:6px;display:flex;align-items:center;gap:10px}
+.card h2 .n{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;flex:0 0 auto;
+  border-radius:10px;background:linear-gradient(135deg,var(--acc),var(--acc2));color:#04121f;font-size:.95rem;font-weight:900}
+.lede{color:var(--muted);font-size:.95rem;margin-bottom:14px}
+.fine{font-size:.82rem;color:var(--faint);margin-top:12px}
+.factor-chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:18px}
+.factor-chips span{font-size:.76rem;font-weight:700;color:var(--muted);border:1px solid var(--line2);
+  border-radius:999px;padding:5px 13px;background:var(--panel)}
+/* tier rows */
+.tier{display:flex;gap:0;margin:14px 0;border-radius:var(--r);overflow:hidden;
+  border:1px solid var(--line);background:var(--panel);animation:rise .5s ease both}
+.tier:nth-child(2){animation-delay:.05s}.tier:nth-child(3){animation-delay:.1s}
+.tier:nth-child(4){animation-delay:.15s}.tier:nth-child(5){animation-delay:.2s}
+.tier:nth-child(6){animation-delay:.25s}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.tier-badge{flex:0 0 118px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;
+  padding:20px 10px;color:#0a0f1a;text-align:center}
+.tier-letter{font-size:2.6rem;font-weight:900;line-height:1}
+.tier-tag{font-size:.72rem;font-weight:800;line-height:1.3;opacity:.85}
+.tier-cards{flex:1;display:flex;flex-wrap:wrap;gap:10px;padding:16px;align-content:center;background:var(--bg2)}
+.pcard{position:relative;border:1.5px solid transparent;border-radius:12px;
+  background:linear-gradient(var(--panel2),var(--panel2)) padding-box,
+    linear-gradient(135deg,var(--tc),var(--tc2)) border-box;
+  padding:12px 14px;min-width:128px;max-width:190px;flex:1 1 128px;cursor:pointer;text-align:left;
+  transition:transform .18s ease,box-shadow .18s ease;color:var(--ink);font-family:var(--font)}
+.pcard:hover,.pcard:focus-visible{transform:translateY(-4px) scale(1.03);
+  box-shadow:0 12px 30px -10px var(--tc),0 0 0 1px var(--tc2);outline:none}
+.pcard .pname{display:block;font-weight:800;font-size:.92rem;line-height:1.25;padding-right:28px}
+.pcard .puse{display:block;font-size:.72rem;color:var(--faint);margin-top:4px;line-height:1.35}
+.pcard .cmp{position:absolute;top:6px;right:6px;width:26px;height:26px;border-radius:8px;border:1px solid var(--line2);
+  background:var(--panel);color:var(--faint);font-size:.85rem;display:flex;align-items:center;justify-content:center;
+  cursor:pointer;transition:all .15s}
+.pcard .cmp:hover{color:var(--acc);border-color:var(--acc)}
+.pcard .cmp.on{background:var(--acc-dim);color:var(--acc);border-color:var(--acc)}
+.pcard .tick{position:absolute;left:8px;top:8px;font-size:.8rem;color:var(--tc);font-weight:900}
+/* modal */
+.mback{position:fixed;inset:0;z-index:80;background:rgba(4,8,16,.7);backdrop-filter:blur(4px);
+  display:none;align-items:center;justify-content:center;padding:20px}
+.mback.open{display:flex;animation:fade .2s ease}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+.modal{background:var(--panel);border:1px solid var(--line2);border-radius:20px;max-width:520px;width:100%;
+  max-height:86vh;overflow:auto;padding:28px;position:relative;animation:pop .25s ease}
+@keyframes pop{from{opacity:0;transform:scale(.96) translateY(10px)}to{opacity:1;transform:none}}
+.modal .m-tier{display:inline-flex;align-items:center;gap:8px;font-weight:900;font-size:.85rem;
+  border-radius:999px;padding:5px 14px;margin-bottom:12px;color:#0a0f1a}
+.modal h3{font-size:1.6rem;font-weight:900;letter-spacing:-.01em;margin-bottom:2px}
+.modal .m-use{color:var(--faint);font-size:.85rem;font-weight:600;margin-bottom:16px}
+.modal h4{font-size:.78rem;font-weight:800;letter-spacing:1.4px;text-transform:uppercase;color:var(--acc);margin:16px 0 6px}
+.modal p{font-size:.93rem;color:var(--muted)}
+.modal p strong{color:var(--ink)}
+.modal .m-x{position:absolute;top:14px;right:14px;width:34px;height:34px;border-radius:10px;border:1px solid var(--line2);
+  background:var(--panel2);color:var(--muted);font-size:1.05rem;cursor:pointer}
+.modal .m-x:hover{color:var(--ink);border-color:var(--acc)}
+.modal .m-actions{display:flex;gap:10px;margin-top:20px}
+.btn{flex:1;border:0;border-radius:12px;padding:12px;font-family:var(--font);font-weight:800;font-size:.9rem;cursor:pointer}
+.btn-go{background:linear-gradient(135deg,var(--acc),var(--acc2));color:#04121f}
+.btn-ghost{background:none;border:1px solid var(--line2);color:var(--muted)}
+.btn-ghost:hover{border-color:var(--acc);color:var(--acc)}
+/* compare tray */
+#tray{position:fixed;left:50%;transform:translateX(-50%) translateY(120px);bottom:18px;z-index:75;
+  background:var(--panel);border:1px solid var(--line2);border-radius:16px;padding:10px 12px;
+  display:flex;align-items:center;gap:10px;box-shadow:0 20px 50px -12px rgba(0,0,0,.7);
+  transition:transform .3s ease;max-width:calc(100vw - 32px)}
+#tray.show{transform:translateX(-50%) translateY(0)}
+#tray .tchips{display:flex;gap:6px;flex-wrap:wrap}
+#tray .tchip{font-size:.78rem;font-weight:700;background:var(--acc-dim);color:var(--acc);
+  border-radius:999px;padding:5px 10px;display:flex;gap:6px;align-items:center}
+#tray .tchip button{border:0;background:none;color:var(--acc);cursor:pointer;font-size:.9rem;padding:0}
+/* compare modal table */
+.cmp-grid{display:grid;gap:12px;margin-top:8px}
+.cmp-col{background:var(--bg2);border:1px solid var(--line);border-radius:14px;padding:16px}
+.cmp-col h5{font-size:1.02rem;font-weight:800}
+.cmp-col .m-tier{margin:8px 0}
+/* footer */
+footer{margin:40px 0 60px;color:var(--muted)}
+footer .wrap{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:26px}
+footer h3{font-size:1.05rem;margin-bottom:8px;color:var(--ink)}
+footer p{font-size:.88rem;margin-bottom:8px}
+footer a{color:var(--acc)}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+@media (max-width:640px){
+  .tier{flex-direction:column}
+  .tier-badge{flex:0 0 auto;flex-direction:row;justify-content:flex-start;padding:12px 16px;gap:12px}
+  .tier-letter{font-size:1.8rem}
+  .tier-tag{text-align:left}
+  .pcard{flex:1 1 calc(50% - 10px);min-width:0}
+  .hero{padding:48px 0 12px}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important}
+  html{scroll-behavior:auto}
+}
+</style>
+</head>
+<body>
+<div class="bg"></div>
+<svg id="ambient" aria-hidden="true" focusable="false"></svg>
+<div id="themeToggle" role="group" aria-label="Theme">
+  <button type="button" data-t="dark" aria-pressed="true">Dark</button>
+  <button type="button" data-t="light" aria-pressed="false">Light</button>
+</div>
+
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">Community-style ranking · Evidence-first</span>
+    <h1>The <span class="grad">Peptide Tier List</span></h1>
+    <p class="sub">Thirty well-known peptides, ranked <strong>S through F</strong> on the <strong>total evidence package</strong> — human data, effect size, safety, and practical value. This is an <strong>educational entertainment-style assessment</strong>, not an objective scientific ranking. Tap any peptide to see why it landed where it did.</p>
+    <div class="factor-chips" aria-label="Ranking factors">
+      <span>Quality of evidence</span><span>Magnitude of effect</span><span>Consistency</span>
+      <span>Safety profile</span><span>Practical usefulness</span><span>Better alternatives?</span>
+    </div>
+  </header>
+
+  <section class="card" id="how">
+    <h2><span class="n">1</span>How the ranking works</h2>
+    <p class="lede" style="margin-bottom:8px">Tiers are <strong style="color:var(--ink)">judgments about the total evidence package</strong> — not declarations that a compound is universally good or bad. Different goals can produce different rankings for the same compound.</p>
+    <p class="lede" style="margin-bottom:0"><strong style="color:var(--ink)">S-tier means "strongest overall case," not "strongest effect."</strong> A modest compound with excellent human evidence can outrank a dramatic one with none — and an effective compound can still land in F if its risks are disproportionate for the use case. Rankings should move as new evidence appears.</p>
+  </section>
+
+  <main id="tiers" aria-label="Peptide tier list"></main>
+
+  <section class="card" id="reasoning">
+    <h2><span class="n">2</span>The reasoning</h2>
+    <p class="lede">Every placement on this list is a judgment about the <strong style="color:var(--ink)">total evidence package</strong> — not a declaration that a compound is universally good or bad. Six factors feed each call: the quality of the human evidence, the magnitude and consistency of the effect, the safety profile, how practically useful it is, whether better-established alternatives exist, and how much confidence you can have in what's actually in the vial. Different goals can legitimately produce different rankings for the same compound.</p>
+    <p class="lede">The single most important rule: <strong style="color:var(--ink)">S-tier means "strongest overall case," not "strongest effect."</strong> A modest compound with excellent human evidence can outrank a dramatic one with none — and an effective compound can still land in F if its risks are disproportionate for the use case. Evidence quality carries real weight, which is why long clinical histories and formal approvals count for so much.</p>
+    <p class="lede"><strong style="color:var(--ink)">Mechanism is not outcome.</strong> A compound can genuinely raise a biomarker without that translating into the results people actually want. Animal findings, plausible pathways, and enthusiastic anecdotes are starting points, not conclusions — anecdotes in particular are wildly inconsistent, and what works in a dish or a mouse doesn't automatically work in a person.</p>
+    <p class="lede" style="margin-bottom:0">These tiers are a <strong style="color:var(--ink)">snapshot, not a verdict</strong>. Good rankings should move as new evidence appears: a compound with thin human data today could earn a promotion tomorrow on the strength of a well-run trial, and a high flyer can fall if its evidence foundation cracks. Read the list as "where the evidence stands right now" — and argue with it. That's the point.</p>
+  </section>
+
+  <footer>
+    <div class="wrap" style="padding:0">
+      <h3>Educational reference — not medical advice</h3>
+      <p>This tier list is an entertainment-style educational assessment. Tier placement reflects the ranking criteria described above — it is not an objective scientific determination of which compound is "best," and nothing here is a recommendation to obtain, prepare, or use any substance.</p>
+      <p>Rankings are reproduced from the supplied tier-list screenshot; commentary is rewritten as generic educational material. Sources informing the reasoning: <a href="https://www.youtube.com/watch?v=vZX0U0owGT0" target="_blank" rel="noopener">the source video discussion</a> and <a href="https://www.peptopurity.com/compounds/" target="_blank" rel="noopener">PeptoPurity's compound profiles</a>.</p>
+      
+      <p class="fine">Absence of evidence is not evidence of safety or efficacy. Always consult a qualified professional.</p>
+    </div>
+  </footer>
+</div>
+
+<div id="tray" role="region" aria-label="Compare tray">
+  <div class="tchips" id="trayChips"></div>
+  <button type="button" class="btn btn-go" id="trayGo" style="flex:0 0 auto;padding:10px 18px">Compare</button>
+</div>
+
+<div class="mback" id="mback">
+  <div class="modal" role="dialog" aria-modal="true" id="modalBox"></div>
+</div>
+
+<script>
+const PEPTIDES = [{"id": "retatrutide", "name": "Retatrutide", "tier": "S", "use": "Triple-receptor metabolic research", "why": "Earns S-tier on a rare combination: an unusual mechanism (GLP-1 + GIP + glucagon activity) backed by substantial human clinical data showing large effects in metabolic health and weight research. Big mechanism AND big human evidence.", "catch": "Still investigational \u2014 strong research data doesn't make it equivalent to an established medicine, and long-term safety is still being characterized."}, {"id": "tirzepatide", "name": "Tirzepatide", "tier": "S", "use": "Dual-receptor metabolic medicine", "why": "S-tier because the dual GLP-1/GIP mechanism translated into meaningful, well-documented clinical outcomes. It's judged on what it accomplished in humans, not how interesting it sounds \u2014 with extensive clinical experience characterizing its benefits, side effects, and limits.", "catch": "A real medicine with real side effects and prescribing considerations \u2014 not a casual compound."}, {"id": "hcg", "name": "HCG", "tier": "S", "use": "Reproductive hormone signaling", "why": "Ranked on history, not hype: decades of clinical use in reproductive medicine and a well-understood mechanism (mimics LH to stimulate testicular testosterone production). A case study in why evidence quality and clinical history should weigh heavily.", "catch": "Technically a glycoprotein hormone rather than a classic peptide \u2014 and its utility is specific, not general-purpose."}, {"id": "growth-hormone", "name": "Growth Hormone", "tier": "S", "use": "Endocrine replacement therapy", "why": "Decades of clinical use for diagnosed growth-hormone deficiency, with well-characterized effects and risks. The depth of human data \u2014 not the hype \u2014 is what puts it here.", "catch": "Effects and risks are highly context-dependent; outside deficiency treatment the risk-benefit looks very different."}, {"id": "melanotan", "name": "Melanotan", "tier": "S", "use": "Pigmentation / photoprotection research", "why": "The family includes afamelanotide, which went through formal clinical evaluation and regulatory approval for a specific light-sensitivity condition \u2014 an unusual depth of human data for a compound from peptide-community culture.", "catch": "Evidence is product- and indication-specific; unregulated versions are a different story."}, {"id": "ghk-cu", "name": "GHK-Cu", "tier": "A", "use": "Skin remodeling & repair", "why": "Meaningful research around skin remodeling, collagen, and tissue repair \u2014 particularly in topical applications. Strong biological rationale with genuinely useful supporting evidence.", "catch": "Topical evidence doesn't automatically transfer to systemic injection; the bolder claims outrun the data."}, {"id": "mazdutide", "name": "Mazdutide", "tier": "A", "use": "Dual-agonist metabolic research", "why": "A GLP-1/glucagon dual agonist with real human clinical-trial data in metabolic disease. Human evidence is what separates A from B.", "catch": "Less established than the S-tier metabolic drugs \u2014 fewer years, fewer patients, narrower track record."}, {"id": "sermorelin", "name": "Sermorelin", "tier": "A", "use": "GHRH-axis research", "why": "A GHRH analogue with a history of formal clinical evaluation \u2014 it was once an approved medicine \u2014 giving it more human data than most secretagogues ever get.", "catch": "Modest practical impact compared with the top tier; history is informative, not decisive."}, {"id": "igf1-lr3", "name": "IGF-1 LR3", "tier": "B", "use": "Growth-factor signaling", "why": "The IGF-1 pathway itself is extremely well established \u2014 a major mediator of growth-hormone signaling with deep literature. A stronger foundation than most experimental compounds get.", "catch": "The modified long-acting version lacks the same evidence depth; greater potency also means greater metabolic and safety trade-offs \u2014 and better-studied alternatives exist for this pathway."}, {"id": "tesamorelin", "name": "Tesamorelin", "tier": "B", "use": "Approved GHRH analogue", "why": "An FDA-approved GHRH analogue \u2014 real regulatory approval and human data behind it, which is more than most peptides on this list can claim.", "catch": "Approved for a narrow, specific condition; the evidence doesn't generalize into broad enhancement claims."}, {"id": "selank", "name": "Selank", "tier": "B", "use": "Cognition / calm research", "why": "Genuine research interest as a neurocognitive peptide \u2014 enough to stay clear of the lower tiers.", "catch": "Subjective cognitive effects are highly placebo-vulnerable, and the research base is limited and geographically concentrated."}, {"id": "semax", "name": "Semax", "tier": "B", "use": "Cognition / focus research", "why": "Similar story to Selank: real research interest and a plausible rationale.", "catch": "Same caveats \u2014 placebo vulnerability, limited and concentrated research, no strong blinded human trials."}, {"id": "nad", "name": "NAD+", "tier": "B", "use": "Cellular energy metabolism", "why": "Central to energy metabolism with a plausible rationale and a growing body of human research \u2014 one of the more scientifically grounded entries in this tier.", "catch": "Evidence for specific products, routes, and outcomes is still developing; interesting is not the same as proven."}, {"id": "bpc-157", "name": "BPC-157", "tier": "C", "use": "Tissue-repair research", "why": "Genuinely interesting preclinical findings provide a plausible mechanism for tissue-repair effects. Enough to be scientifically interesting.", "catch": "The leap from animal models to human outcomes is unmade; anecdotes are wildly inconsistent \u2014 better controlled human research is needed."}, {"id": "tb-500", "name": "TB-500", "tier": "C", "use": "Repair / recovery research", "why": "Thymosin beta-4 biology around cell migration and tissue repair gives it a plausible mechanism.", "catch": "Evidence for the precursor protein isn't evidence for every marketed TB-500 version; direct human data remains limited."}, {"id": "glow-stack", "name": "Glow Stack", "tier": "C", "use": "Multi-peptide cosmetic stack", "why": "Included as a concept: the theoretical appeal of combining complementary compounds.", "catch": "Combining several uncertain compounds doesn't create evidence \u2014 and stacks make it harder to tell what's doing what."}, {"id": "ghrp26", "name": "GHRP-2 / GHRP-6", "tier": "C", "use": "GH secretagogues", "why": "Real secretagogue pharmacology with human research behind the mechanism \u2014 these genuinely stimulate GH release.", "catch": "Raising a biomarker isn't the same as improving outcomes; practical benefits are harder to establish than the mechanism."}, {"id": "cjc-1295", "name": "CJC-1295", "tier": "C", "use": "GHRH analogue", "why": "A GHRH analogue with some human research behind it, often discussed alongside the secretagogues.", "catch": "Same tier logic as its neighbors: the gap between mechanism and demonstrated practical benefit keeps it mid-tier."}, {"id": "dsip", "name": "DSIP", "tier": "C", "use": "Sleep research", "why": "Historical research suggesting effects on sleep \u2014 an interesting signal worth noting.", "catch": "Old studies with methodological limits, inconsistent results, and little modern validation; subjective sleep is notoriously hard to measure."}, {"id": "a1mq", "name": "5-Amino-1MQ", "tier": "C", "use": "Metabolic pathway research", "why": "Plausible mechanisms around metabolism and glucose regulation make the theory interesting.", "catch": "Biochemical theory isn't human results \u2014 and it competes against metabolic drugs with massive human evidence."}, {"id": "slu-pp-332", "name": "SLU-PP-332", "tier": "C", "use": "Exercise-mimetic research", "why": "Scientifically fascinating: probes whether aspects of exercise physiology can be pharmacologically reproduced.", "catch": "Animal data can't substitute for human evidence \u2014 and actual exercise already exists with enormous evidence behind it."}, {"id": "ipamorelin", "name": "Ipamorelin", "tier": "D", "use": "GH secretagogue", "why": "A recognizable mechanism and real human research keep it out of F \u2014 stimulating endogenous GH release is scientifically interesting.", "catch": "But raising growth hormone doesn't automatically translate into muscle, recovery, or body-composition outcomes. Mechanism is not outcome."}, {"id": "kisspeptin", "name": "Kisspeptin", "tier": "D", "use": "Reproductive signaling", "why": "A legitimate reproductive hormone signal with real human research in fertility contexts.", "catch": "As a general-purpose community compound, the evidence for broader claims is thin."}, {"id": "mots-c", "name": "MOTS-c", "tier": "D", "use": "Mitochondrial-derived peptide", "why": "An intriguing mitochondrial-derived peptide with interesting early research.", "catch": "Human evidence is still early-stage \u2014 fascinating science, not yet a strong overall case."}, {"id": "epithalon", "name": "Epithalon", "tier": "F", "use": "Longevity claims", "why": "Placed here on evidence grading, not vibes: frequently marketed with dramatic longevity claims.", "catch": "The human evidence base is thin \u2014 mostly small or older studies \u2014 while the claims run far ahead of what the data can support."}, {"id": "methylene-blue", "name": "Methylene Blue", "tier": "F", "use": "Repurposed classic drug", "why": "An established medicine for specific indications \u2014 included to show that 'old drug' doesn't mean 'proven enhancer'.", "catch": "The leap to general cognitive-enhancement claims isn't supported by strong evidence, and off-label dosing carries its own questions."}, {"id": "aod-9604", "name": "AOD-9604", "tier": "F", "use": "hGH fragment / fat-loss", "why": "A modified growth-hormone fragment that once went through real development for fat loss.", "catch": "Human trial results were underwhelming relative to the marketing \u2014 a reminder that mechanisms alone don't earn high tiers."}, {"id": "adipotide", "name": "Adipotide", "tier": "F", "use": "Experimental fat-targeting peptide", "why": "Produced dramatic fat-loss effects in preclinical work \u2014 the kind of result that generates excitement.", "catch": "Development stalled amid safety concerns; a textbook case of animal results not translating into a viable human profile."}, {"id": "dihexa", "name": "Dihexa", "tier": "F", "use": "Neurogenic compound", "why": "Included as a cautionary example: the proposed neural-growth effects generated real excitement.", "catch": "When the published research supporting major claims gets challenged or retracted, the evidence foundation collapses \u2014 interesting science is not automatically good evidence."}, {"id": "insulin", "name": "Insulin", "tier": "F", "use": "Metabolic hormone (performance misuse)", "why": "An essential, powerful medicine \u2014 nobody disputes that it 'works'.", "catch": "For non-diabetic performance enhancement the risk-benefit is poor: the same potency that makes it valuable makes hypoglycemia a potential emergency. F means the risks outweigh the benefit for this use case \u2014 not that it's ineffective."}];
+const TIERS = [{"letter": "S", "color": "#facc15", "light": "#fef08a", "tag": "Strongest overall case", "blurb": "The full package: human evidence, meaningful effect, acceptable risk, practical relevance."}, {"letter": "A", "color": "#4ade80", "light": "#bbf7d0", "tag": "Excellent, with a catch", "blurb": "Compelling evidence or real potential \u2014 but a meaningful limitation keeps it from S."}, {"letter": "B", "color": "#a3e635", "light": "#d9f99d", "tag": "Legit, still proving it", "blurb": "Real scientific basis and useful evidence, but missing the top-tier combination."}, {"letter": "C", "color": "#fbbf24", "light": "#fde68a", "tag": "Interesting, not proven", "blurb": "Plausible, preliminary, or inconsistent \u2014 substantially uncertain."}, {"letter": "D", "color": "#fb923c", "light": "#fed7aa", "tag": "Weak case for the hype", "blurb": "Limited evidence for the claimed uses, or clearly outclassed by alternatives."}, {"letter": "F", "color": "#f87171", "light": "#fecaca", "tag": "Claims outrun evidence", "blurb": "Inadequate evidence, shaky foundations, or a risk-benefit that doesn't work for the use case."}];
+</script>
+<script>
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const tierOf = l => TIERS.find(t => t.letter === l);
+const pepById = id => PEPTIDES.find(p => p.id === id);
+
+/* ---------- render tiers ---------- */
+function renderTiers(){
+  $('#tiers').innerHTML = TIERS.map((t, i) => {
+    const ps = PEPTIDES.filter(p => p.tier === t.letter);
+    return '<section class="tier" style="--tc:' + t.color + ';--tc2:' + t.light + '" aria-label="Tier ' + t.letter + '">' +
+      '<div class="tier-badge" style="background:' + t.color + '">' +
+        '<span class="tier-letter">' + t.letter + '</span>' +
+        '<span class="tier-tag">' + esc(t.tag) + '</span></div>' +
+      '<div class="tier-cards">' +
+        ps.map(p =>
+          '<div class="pcard" role="button" tabindex="0" data-id="' + p.id + '" aria-label="' + esc(p.name) + ', tier ' + t.letter + '">' +
+          (cmpSel.has(p.id) ? '<span class="tick">✓</span>' : '') +
+          '<span class="pname">' + esc(p.name) + '</span>' +
+          '<span class="puse">' + esc(p.use) + '</span>' +
+          '<button type="button" class="cmp' + (cmpSel.has(p.id) ? ' on' : '') + '" data-cmp="' + p.id + '" title="Add to compare" aria-label="Add ' + esc(p.name) + ' to compare">⇄</button>' +
+          '</div>').join('') +
+      '</div></section>';
+  }).join('');
+  document.querySelectorAll('.pcard').forEach(c => {
+    c.addEventListener('click', e => {
+      if (e.target.closest('.cmp')) return;
+      openModal(c.dataset.id);
+    });
+    c.addEventListener('keydown', e => {
+      if ((e.key === 'Enter' || e.key === ' ') && !e.target.closest('.cmp')){ e.preventDefault(); openModal(c.dataset.id); }
+    });
+  });
+  document.querySelectorAll('[data-cmp]').forEach(b =>
+    b.addEventListener('click', e => { e.stopPropagation(); toggleCmp(b.dataset.cmp); }));
+}
+
+/* ---------- modal ---------- */
+function openModal(id){
+  const p = pepById(id), t = tierOf(p.tier);
+  $('#modalBox').innerHTML =
+    '<button type="button" class="m-x" id="mClose" aria-label="Close">×</button>' +
+    '<span class="m-tier" style="background:' + t.color + '">Tier ' + t.letter + ' · ' + esc(t.tag) + '</span>' +
+    '<h3>' + esc(p.name) + '</h3>' +
+    '<p class="m-use">' + esc(p.use) + '</p>' +
+    '<h4>Why is this here?</h4><p>' + esc(p.why) + '</p>' +
+    '<h4>The catch</h4><p>' + esc(p.catch) + '</p>' +
+    '<div class="m-actions">' +
+      '<button type="button" class="btn btn-ghost" id="mCmp">' + (cmpSel.has(id) ? 'Remove from compare' : 'Add to compare') + '</button>' +
+      '<button type="button" class="btn btn-go" id="mOk">Got it</button>' +
+    '</div>';
+  $('#mback').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  $('#mClose').addEventListener('click', closeModal);
+  $('#mOk').addEventListener('click', closeModal);
+  $('#mCmp').addEventListener('click', () => { toggleCmp(id); closeModal(); });
+}
+function closeModal(){
+  $('#mback').classList.remove('open');
+  document.body.style.overflow = '';
+}
+$('#mback').addEventListener('click', e => { if (e.target.id === 'mback') closeModal(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape'){ closeModal(); } });
+
+/* ---------- compare ---------- */
+const cmpSel = new Set();
+function toggleCmp(id){
+  if (cmpSel.has(id)) cmpSel.delete(id);
+  else { if (cmpSel.size >= 3){ flashTray('Max 3 — remove one first'); return; } cmpSel.add(id); }
+  renderTiers(); renderTray();
+}
+function renderTray(){
+  const tray = $('#tray');
+  if (!cmpSel.size){ tray.classList.remove('show'); return; }
+  tray.classList.add('show');
+  $('#trayChips').innerHTML = [...cmpSel].map(id => {
+    const p = pepById(id);
+    return '<span class="tchip">' + esc(p.name) +
+      '<button type="button" data-rm="' + id + '" aria-label="Remove ' + esc(p.name) + '">×</button></span>';
+  }).join('');
+  tray.querySelectorAll('[data-rm]').forEach(b =>
+    b.addEventListener('click', () => toggleCmp(b.dataset.rm)));
+}
+let trayTimer = null;
+function flashTray(msg){
+  const go = $('#trayGo'), old = go.textContent;
+  go.textContent = msg; clearTimeout(trayTimer);
+  trayTimer = setTimeout(() => { go.textContent = old; }, 1600);
+}
+$('#trayGo').addEventListener('click', () => {
+  if (cmpSel.size < 2){ flashTray('Pick at least 2'); return; }
+  const cols = [...cmpSel].map(id => {
+    const p = pepById(id), t = tierOf(p.tier);
+    return '<div class="cmp-col"><h5>' + esc(p.name) + '</h5>' +
+      '<span class="m-tier" style="background:' + t.color + ';font-size:.75rem">Tier ' + t.letter + '</span>' +
+      '<p style="font-size:.82rem;color:var(--muted)"><strong style="color:var(--ink)">Known for:</strong> ' + esc(p.use) + '</p>' +
+      '<p style="font-size:.82rem;color:var(--muted);margin-top:8px"><strong style="color:var(--ink)">Why here:</strong> ' + esc(p.why) + '</p>' +
+      '<p style="font-size:.82rem;color:var(--muted);margin-top:8px"><strong style="color:var(--ink)">Catch:</strong> ' + esc(p.catch) + '</p></div>';
+  }).join('');
+  $('#modalBox').innerHTML =
+    '<button type="button" class="m-x" id="mClose" aria-label="Close">×</button>' +
+    '<h3>Side by side</h3><p class="m-use">Same criteria, different verdicts.</p>' +
+    '<div class="cmp-grid" style="grid-template-columns:repeat(' + cmpSel.size + ',1fr)">' + cols + '</div>' +
+    '<div class="m-actions"><button type="button" class="btn btn-go" id="mOk">Done</button></div>';
+  $('#mback').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  $('#mClose').addEventListener('click', closeModal);
+  $('#mOk').addEventListener('click', closeModal);
+});
+
+
+
+/* ---------- ambient dots (SVG, 140) ---------- */
+const DOT_DARK = ["#ff6b9d","#ffa552","#ffd166","#c084fc","#ff8fa3","#fb923c"];
+const DOT_LIGHT = ["#e1437f","#e07b2a","#d9a41b","#9d5fe0","#e0607e","#dd6f1f"];
+const SVGNS = "http://www.w3.org/2000/svg";
+let ambientDots = [], ambientRAF = null, ambientT = 0;
+const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+function buildAmbient(){
+  const svg = document.querySelector("#ambient");
+  svg.innerHTML = "";
+  ambientDots = [];
+  const W = innerWidth, H = innerHeight;
+  svg.setAttribute("viewBox", "0 0 " + W + " " + H);
+  const pal = document.documentElement.dataset.theme === "light" ? DOT_LIGHT : DOT_DARK;
+  for (let k = 0; k < 140; k++){
+    const c = document.createElementNS(SVGNS, "circle");
+    const r = 1.4 + Math.random() * 2.2;
+    const base = 0.30 + Math.random() * 0.35;
+    c.setAttribute("r", r.toFixed(2));
+    c.setAttribute("fill", pal[k % 6]);
+    c.setAttribute("opacity", base.toFixed(2));
+    svg.appendChild(c);
+    ambientDots.push({
+      el: c, x: Math.random() * W, y: Math.random() * H,
+      vx: (Math.random() - .5) * .3, vy: (Math.random() - .5) * .3,
+      base: base, ph: Math.random() * Math.PI * 2, sp: .4 + Math.random() * 1.4
+    });
+  }
+  if (!reducedMotion) startAmbient();
+}
+function recolorAmbient(){
+  const pal = document.documentElement.dataset.theme === "light" ? DOT_LIGHT : DOT_DARK;
+  ambientDots.forEach((d, k) => d.el.setAttribute("fill", pal[k % 6]));
+}
+function tickAmbient(){
+  ambientT += .016;
+  const W = innerWidth, H = innerHeight;
+  for (const d of ambientDots){
+    d.x = (d.x + d.vx + W) % W;
+    d.y = (d.y + d.vy + H) % H;
+    d.el.setAttribute("transform", "translate(" + d.x.toFixed(1) + " " + d.y.toFixed(1) + ")");
+    d.el.setAttribute("opacity", (d.base * (.7 + .3 * Math.sin(ambientT * d.sp + d.ph))).toFixed(2));
+  }
+  ambientRAF = requestAnimationFrame(tickAmbient);
+}
+function startAmbient(){
+  if (ambientRAF || reducedMotion) return;
+  ambientRAF = requestAnimationFrame(tickAmbient);
+}
+function stopAmbient(){
+  if (ambientRAF){ cancelAnimationFrame(ambientRAF); ambientRAF = null; }
+}
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden) stopAmbient(); else startAmbient();
+});
+let rszT = null;
+addEventListener("resize", () => { clearTimeout(rszT); rszT = setTimeout(() => { stopAmbient(); buildAmbient(); }, 250); });
+
+/* ---------- theme ---------- */
+function setTheme(t){
+  document.documentElement.dataset.theme = t;
+  recolorAmbient();
+  try { localStorage.setItem('tierlist-theme', t); } catch(e){}
+  document.querySelectorAll('#themeToggle button').forEach(b =>
+    b.setAttribute('aria-pressed', b.dataset.t === t));
+}
+document.querySelectorAll('#themeToggle button').forEach(b =>
+  b.addEventListener('click', () => setTheme(b.dataset.t)));
+
+/* ---------- init ---------- */
+document.addEventListener('DOMContentLoaded', () => {
+  let saved = 'dark';
+  try { saved = localStorage.getItem('tierlist-theme') || 'dark'; } catch(e){}
+  setTheme(saved);
+  renderTiers();
+  renderTray();
+  buildAmbient();
+});
+</script>
+</body>
+</html>
